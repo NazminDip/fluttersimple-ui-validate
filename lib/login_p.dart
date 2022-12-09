@@ -12,12 +12,20 @@ class LoginP extends StatefulWidget {
 }
 
 class _LoginPState extends State<LoginP> {
-  // final usercontroller = TextEditingController();
-  // final paawordcontroller = TextEditingController();
-  String gmail = "";
-  String password = "";
+  TextEditingController userController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  // String gmail = "";
+  // var password = "";
   bool isVisible = true;
+
   final formkey = GlobalKey<FormState>();
+  @override
+  void initState() {
+    super.initState();
+    userController = TextEditingController();
+    passwordController = TextEditingController();
+  }
+
   @override
   Widget build(BuildContext context) {
     // ignore: dead_code
@@ -44,8 +52,6 @@ class _LoginPState extends State<LoginP> {
                           padding: const EdgeInsets.all(8.0),
                           child: TextFormField(
                             decoration: const InputDecoration(
-                              //hintText: "Enter your gmail",
-                              hintStyle: TextStyle(color: Colors.black),
                               label: Text(
                                 "Gmail",
                                 style: TextStyle(
@@ -54,78 +60,59 @@ class _LoginPState extends State<LoginP> {
                               ),
                               suffix: Icon(Icons.mail, color: Colors.white),
                             ),
-                            validator: (String? value) {
-                              if (!value!.contains("@")) {
-                                return "Enter your Correct gmail ";
-                              } else {}
+                            validator: (value) {
+                              return emailValidation(value);
                             },
-                            onSaved: (newValue) {
-                              gmail = newValue!;
-                            },
+                            // onSaved: (newValue) {
+                            //   gmail = newValue!;
+                            // },
                           ),
                         ),
                         const SizedBox(height: 10),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextFormField(
-                              obscureText: isVisible ? true : false,
-                              decoration: InputDecoration(
-                                hintText: "Enter your password",
-                                hintStyle: const TextStyle(color: Colors.black),
-                                label: const Text(
-                                  "Password",
-                                  style: TextStyle(
-                                      color: Colors.purple,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                suffix: IconButton(
-                                  color: Colors.white,
-                                  icon: isVisible
-                                      ? const Icon(Icons.visibility_off)
-                                      : const Icon(Icons.visibility),
-                                  onPressed: () {
-                                    setState(
-                                      () {
-                                        isVisible = !isVisible;
-                                      },
-                                    );
-                                  },
-                                ),
-
-                                //Icon(Icons.lock, color: Colors.white),
+                            obscureText: isVisible ? true : false,
+                            decoration: InputDecoration(
+                              label: const Text(
+                                "Password",
+                                style: TextStyle(
+                                    color: Colors.purple,
+                                    fontWeight: FontWeight.bold),
                               ),
-                              validator: (String? value) {
-                                if (value!.length < 6) {
-                                  return "Password must six character";
-                                }
-                              },
-                              onSaved: (newValue) {
-                                password = newValue!;
-                              }),
+                              suffix: IconButton(
+                                color: Colors.white,
+                                icon: isVisible
+                                    ? const Icon(Icons.visibility_off)
+                                    : const Icon(Icons.visibility),
+                                onPressed: () {
+                                  setState(
+                                    () {
+                                      isVisible = !isVisible;
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                            validator: (value) {
+                              return passwordValidation(value);
+                            },
+                            // onSaved: (newValue) {
+                            //   password = newValue!;
+                            // }
+                          ),
                         ),
                         const SizedBox(height: 10),
                         ElevatedButton(
                           onPressed: () {
-                            if (formkey.currentState!.validate()) {
-                              // formkey.currentState!.save();
-                              // print(
-                              //     "Your gmail is $gmail and password $password");
-                              // } else {
-                              Navigator.pushNamed(context, "/login");
-                            } else {
-                              Navigator.pushNamed(context, "/loginp");
-                            }
+                            logInButton();
                           },
                           child: const Text("Login"),
                         ),
                         const SizedBox(height: 10),
                         InkWell(
                           onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const RegisterPage()));
+                            logInButton();
                           },
                           child: const Padding(
                             padding: EdgeInsets.all(12.0),
@@ -145,6 +132,39 @@ class _LoginPState extends State<LoginP> {
       ),
     );
   }
-}
 
-class FormFiledState {}
+  emailValidation(var value) {
+    if (value.isEmpty) {
+      return 'Please Enter Your Email';
+    } else if (!value.contains('@')) {
+      return 'Please Enter Correct Email';
+    }
+    return;
+  }
+
+  passwordValidation(value) {
+    if (value.isEmpty) {
+      return 'Please Enter Your Password';
+    } else if (value.length <= 7) {
+      return 'password should be 8 characters';
+    }
+    return null;
+  }
+
+  logInButton() {
+    final isValid = formkey.currentState!.validate();
+    if (!isValid) {
+      formkey.currentState!.save();
+      return ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+          "Your Gmail or Password Is Incorrect",
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+        backgroundColor: Colors.red,
+      ));
+    } else if (isValid) {
+      return Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const RegisterPage()));
+    }
+  }
+}
